@@ -4,20 +4,14 @@
  * Modifica el tag div con id main en el html
  */
 function showLogin(){
-let html=
-  `
+let html=  `
   <h1>Ingresar Usuario</h1>
-  <ul>
-    <li>
-     <label for="Usuario">Nombre de Usuario:</label> 
-     <input type="text" name="usuario" id="usuario"><br>
-    </li>
-    <li>
-      <label for="Contrasena">Contraseña:</label>
-      <input type="text" name="contrasena" id="contrasena"><br>
-     </li>
-   </ul>
-     <button onclick=''>Enviar</button></br>
+     <label for="user">Nombre de Usuario:</label> 
+     <input type="text" name="owner" id="owner"><br>
+
+      <label for="text">Contraseña:</label>
+      <input type="text" name="password" id="password"><br>
+     <button onclick='doLogin()'>Enviar</button></br>
    `;
     document.getElementById('main').innerHTML = html;
 }
@@ -28,15 +22,17 @@ let html=
  * La respuesta del CGI es procesada por la función loginResponse
  */
 function doLogin(){
-  var usuario = document.getElementById("usuario").value;
-  var contrasena = document.getElementById("contrasena").value;
+  let usuario = document.getElementById("owner").value;
+  let contrasena = document.getElementById("password").value;
+  console.log(usuario)
+  console.log(password)
   var url =  "../cgi-bin/login.pl?owner="+usuario+"&password="+contrasena;
   var promise = fetch(url);
   promise.then(response => response.text())
   .then(data => {
-    var xml = (new window.DOMParser() ).parseFromString(data, "text/xml");
-    loginResponse(xml);
+    var xml = (new window.DOMParser()).parseFromString(data, "text/xml");
     console.log(xml);
+    loginResponse(xml);
   }).catch(error => {
     console.log("Error:",error);   
   });
@@ -51,13 +47,24 @@ function doLogin(){
  * indicando que los datos de usuario y contraseña no coinciden.
  */
 function loginResponse(xml){
-  var userFullName = xml.getElementById("firstName")+xml.getElementById("lastName");
-  var userKey = xml.getElementById("owner");
-    if(userFullName!=null && userKey!=null){
-      ShowLoggedIn();
-    }else{
-      console.log("Datos no coinciden");
-    }
+  let camResp = xml.getElementsByTagName("user")[0].textContent;
+  if(camResp != '\n'){
+     let owner=xml.getElementsByTagName("owner")[0].textContent;
+     let firstName=xml.getElementsByTagName("firstName")[0].textContent;
+     let lastName=cml.getElementsByTagName("lastName")[0].textContent;
+    userFullName = firstName+" "+lastName;
+    userKey = owner;
+    console.log(userFullName);
+    console.log(userKey);
+    console.log(owner);
+    console.log(firstName);
+    console.log(lastName);
+    console.log(xml)
+    showLoggedIn();
+  }else{
+    showLoggedIn();
+    document.getElementById('cambio').innerHTML='Error';
+  }
 }
 /**
  * esta función usa la variable userFullName, para actualizar el
@@ -66,7 +73,6 @@ function loginResponse(xml){
  */
   function showLoggedIn(){
   document.getElementById('userName').innerHTML = userFullName;
-  let html = '<h1>Se reconocio al usuario</h1>';
   showWelcome();
   showMenuUserLogged();
   }
@@ -89,11 +95,8 @@ function loginResponse(xml){
          <input type='text' name='lastName' id='lastName'></br>
          <div class="main">
          <button onclick="doCreateAccount()">Registrar</button></br>
-         </div>
-         <script>
-         doCreateAccount();
-         </script> `
-      document.getElementById('main').innerHTML = HTML;
+         </div>`;
+      document.getElementById('main').innerHTML = html;
   }
 
 /* Esta función extraerá los datos ingresados en el formulario de
@@ -101,17 +104,17 @@ function loginResponse(xml){
  * la respuesta de este CGI será procesada por loginResponse.
  */
 function doCreateAccount(){
-  var usuario = document.getElementById("userName").value;
-  var contrasena = document.getElementById("password").value;
-  var firstName = document.getElementById("firstName").value;
-  var lastName = document.getElementById("lastName").value;
-  var url = "../ProyectoFinal/cgi-bin/register.pl?userName="+usuario+"&password="+contrasena+"&firstName="+firstName+"&lastName="+lastName;
+  let usuario = document.getElementById("userName").value;
+  let contrasena = document.getElementById("password").value;
+  let firstName = document.getElementById("firstName").value;
+  let lastName = document.getElementById("lastName").value;
+  let url = "../ProyectoFinal/cgi-bin/register.pl?userName="+usuario+"&password="+contrasena+"&firstName="+firstName+"&lastName="+lastName;
   var promise = fetch(url);
   promise.then(response => response.text())
   .then(data => {
     var xml = (new window.DOMParser()).parseFromString(data, "text/xml");
-     loginResponse(xml);
      console.log(xml);
+     loginResponse(xml);
   }).catch(error => {
      console.log("Error:",error);   
   });
@@ -123,14 +126,13 @@ function doCreateAccount(){
  * La respuesta del CGI debe ser procesada por showList
  */
 function doList(){
-  var userKey;
-  var url = "../ProyectoFinal/cgi-bin/list.pl?user="+userKey;
-  var promise = fetch(url);
-  promise.then(response => response.text())
+  let url = "../ProyectoFinal/cgi-bin/list.pl?user="+userKey;
+  let promise = fetch(url);
+  promise.then(response=>response.text())
   .then(data => {
-    var xml = (new window.DOMParser()).parseFromString(data, "text/xml");
-      showList(xml);
+    let xml = (new window.DOMParser()).parseFromString(data, "text/xml");
       console.log(xml);
+      showList(xml);
     }).catch(error => {
       console.log("Error:",error);   
    });
@@ -146,20 +148,20 @@ function doList(){
  * indicándolo.
  */
   function showList(xml){
-    var list = xml.getElementsByTagName('title');
-    let html = '<ul>';
-    if(xml.textContent = null){
-      html += "la lista esta vacia";
-    }
-    for(let i=0;i<list.lenght;i++){
-       html += `
-             <li> list[0] 
-            <button onclick="doView()">Ver</button>
-            <button onclick="dodelete()">Eliminar</button>
-            <button onclick="doEdit">Editar</button>
-        `;
+    let list = "No contiene articulos";
+    if(xml.getElementsByTagName('articles')[0].textContent != '\n'){
+      let articles = xml.getElementsByTagName("article");
+      list="<ul>\n";
+      for(let i=0;i<articles.length;i++){
+        let title = xml.getElementsByTagName('title')[i].textContent;
+        let botones = `<button onclick= "doView"(userKey,'` + title+ `')">v</button>`+
+                `<button onclick= "doEdit(userkey,'` + title+ `')">E</button>`+
+                `<button onclick= "doDelete(userKey,'` + title+ `')">D</button>`;
+            list+="<li>"+title+botones+"</li>"+"<br>";
       }
-
+      list+="</ul>"
+    }
+document.getElemetById('main').innerHTML = list
   }
 
 /**
@@ -171,12 +173,10 @@ function doList(){
  function showNew(){
    let html =  `
   <h1>Creacion de un nuevo articulo</h1>
-  <label for="user">Usuario:</label>
-  <input type="text" name="user" id="user"></br>
   <label for="title">Titulo:</label>
   <input type="text" name="title" id="title"></br>
   <label for="texto">Texto:</label>
-  <input type="textTarea" name="texto" id="texto"></br>
+  <input type="textTarea" name="text" id="text"></br>
   <div id='enviar'>
       <button onclick="doNew()">Enviar</button></br>
   </div>
@@ -194,16 +194,20 @@ function doList(){
  * función responseNew
  */
   function doNew(){
-    var user = document.getElementById("user").value;
-    var title = document.getElementById("title").value;
-    var texto = document.getElementById("texto").value;
-    var url = "../ProyectoFinal/cgi-bin/new.pl?user="+user+"&title="+title+"&text="+texto;
-    var promise = fetch(url);
+    let title = document.getElementById("title").value;
+    let text = document.getElementById("text").value;
+    console.log(userKey);
+    text= encodeURIComponent(text);
+    console.log(text);
+    let url = "../ProyectoFinal/cgi-bin/new.pl?owner="+userKey+"&title="+title+"&text="+text;
+    console.log(title);
+    console.log(text)
+    let promise = fetch(url);
     promise.then(response=>response.text())
     .then(data=>{
-      var xml = (new window.DOMParser()).parseFromString(data, "text/xml");
-      responseNew(xml);
+      let xml = (new window.DOMParser()).parseFromString(data, "text/xml");
       console.log(xml);
+      responseNew(xml);
      }).catch(error => {
        console.log("Error:",error);   
      });
@@ -215,12 +219,10 @@ function doList(){
  * correspondiera
  */
 function responseNew(response){
-  var list = response.getElementsByTagName('articles');
-  let html = "";
-  if(xml.textContent = null){
-    html += "Error";
-  }
-  html += `<h1>list<h1>`;""
+  let title = response.getElementsByTagName('title')[0].textContent;
+  let text = response.getElementsByTagName('text')[0].textContent;
+  let html = '<h1>' + title + "</h1>\n<pre>"+text+"</pre>";
+  document.getElementById('main').innerHTML = html;
 }
 
 /*
@@ -228,13 +230,14 @@ function responseNew(response){
  * atendida por responseView
  */
   function doView(owner, title){
-   var url = "../ProyectoFinal/cgi-bin/view.pl?owner="+owner+"&title="+title;
-   var promise = fetch(url);
+   console.log(owner);
+   console.log(title);
+   let url = "../ProyectoFinal/cgi-bin/view.pl?owner="+owner+"&title="+title;
+   let promise = fetch(url);
    promise.then(response => response.text())
   .then(data => {
-     var response = (new window.DOMParser()).parseFromString(data, "text/xml");
-     responseView(response);
-     console.log(response);
+     console.log(data);
+     responseView(data);
    }).catch(error => {
      console.log("Error:",error);   
    });
@@ -245,12 +248,8 @@ function responseNew(response){
  * un mensaje de error en caso de algún problema.
  */
   function responseView(response){
-   var list = response.getElementsByTagName('articles');
-    let html = "";
-    if(xml.textContent = null){
-       html += "Error";
-    }
-    html += `<h1>list<h1>`;
+    console.log(response);
+    document.getElementById('main').innerHTML = response;
  }
 
 /*
@@ -258,14 +257,18 @@ function responseNew(response){
  * borrar como argumentos, la respuesta del CGI debe ser atendida por doList
  */
   function doDelete(owner, title){
-    var url = "../ProyectoFinal/cgi-bin/delete.pl?user="+owner+"&title="+title;
-    var promise = fetch(url);
+    let url = "../ProyectoFinal/cgi-bin/delete.pl?user="+owner+"&title="+title;
+    let promise = fetch(url);
     promise.then(response=>response.text())
     .then(data=>{
-          doList();
+       let response = (new window.DOMParser()).parseFromString(data, "text/xml");
+       console.log(response);
+       doList(response);
      }).catch(error=>{
        console.log("Error:",error);   
      });
+    let html = '<h1>Pagina Eliminada</h1>';
+    document.getElementById('main').innerHTML=html;
  }
 
 /*
@@ -273,13 +276,13 @@ function responseNew(response){
  * article.pl la respuesta del CGI es procesada por responseEdit
  */
   function doEdit(owner, title){
-    var url = "../ProyectoFinal/cgi-bin/article.pl?userName="+owner+"&title="+title;
-    var promise = fetch(url);
+    let url = "../ProyectoFinal/cgi-bin/article.pl?owner="+userKey+"&title="+title;
+    let promise = fetch(url);
     promise.then(response => response.text())
     .then(data => {
-      var response = (new window.DOMParser()).parseFromString(data, "text/xml");
-      responseEdit(xml);
+      let response = (new window.DOMParser()).parseFromString(data, "text/xml");
       console.log(response);
+      responseEdit(response);
     }).catch(error=>{
       console.log("Error:",error);   
     });
@@ -292,18 +295,20 @@ function responseNew(response){
  * - Cancelar que invoca a doList
  */
   function responseEdit(xml){
-   var title = response.getElementsByTagName('title');  
-   var text = response.getElementsByTagName('text');  
+   let title = xml.getElementsByTagName('title')[0].textContent;  
+   let text = xml.getElementsByTagName('text')[0].textContent;  
+    console.log(title);
+    console.log(text);
    let html = `
-         <h1> $titulo </h1>
+         <h1>`+title+ `</h1>
          <label for="texto"> title </label>
-         <textarea id="msg" name="texto" rows="15" cols="35" id ='texto'>text</textarea>
+         <textarea id="msg" name="texto" rows="15" cols="35" id ='texto'>`+text+`</textarea>
          <div id='enviar'>
-         <button onclick="doUpdate()">Actualizar</button>
-         </div>
+         <button onclick="doUpdate('`+title + `')">Actualizar</button><br>
          <div id='cancelar'>
-         <button onclick="doList()">Cancelar</button>
-        </div>`
+         <button onclick="doList()">Cancelar</button><br>`;
+    document.getElementById('main').innerHTML = html;
+    text=encodeURIComponent(text);
   }
 /*
  * Esta función recibe el título del artículo y con la variable userKey y 
@@ -311,14 +316,16 @@ function responseNew(response){
  * La respuesta del CGI debe ser atendida por responseNew
  */
   function doUpdate(title){
-    var userKey = document.getElementById("userkey").value;
-    var url = "../ProyectoFinal/cgi-bin/update.pl?owner="+userKey+"&title="+title;
-    var promise = fetch(url);
+    console.log(title);
+    let texto = document.getElementById('text');
+    text = encodeURIComponent(texto);
+    let url = "../ProyectoFinal/cgi-bin/update.pl?owner="+userKey+"&title="+title+"&text="+text;
+    let promise = fetch(url);
     promise.then(response=>response.text())
     .then(data=>{
-      var response = (new window.DOMParser()).parseFromString(data, "text/xml");
-      responseNew(response);
-      console.log(response);
+      let xml = (new window.DOMParser()).parseFromString(data, "text/xml");
+      console.log(xml);
+      responseNew(xml);
      }).catch(error=>{
        console.log("Error:",error);   
      });
