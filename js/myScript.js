@@ -26,7 +26,7 @@ function doLogin(){
   let contrasena = document.getElementById("password").value;
   console.log(usuario)
   console.log(password)
-  var url =  "../cgi-bin/login.pl?owner="+usuario+"&password="+contrasena;
+  var url = "http://192.168.56.102/~alumno/ProyectoFinal/cgi-bin/login.pl?owner="+usuario+"&password="+contrasena;
   var promise = fetch(url);
   promise.then(response => response.text())
   .then(data => {
@@ -83,7 +83,7 @@ function loginResponse(xml){
  * función doCreateAccount
  */
   function showCreateAccount(){
-  let HTML =  `
+  let html =  `
          <h1>Crear un Nuevo Usuario</h1>
          <label for='userName'>Usuario: </label>
          <input type='text' name='userName' id='userName'></br>
@@ -108,11 +108,11 @@ function doCreateAccount(){
   let contrasena = document.getElementById("password").value;
   let firstName = document.getElementById("firstName").value;
   let lastName = document.getElementById("lastName").value;
-  let url = "../ProyectoFinal/cgi-bin/register.pl?userName="+usuario+"&password="+contrasena+"&firstName="+firstName+"&lastName="+lastName;
-  var promise = fetch(url);
+  let url = "http://192.168.56.102/~alumno/ProyectoFinal/cgi-bin/register.pl?userName="+usuario+"&password="+contrasena+"&firstName="+firstName+"&lastName="+lastName;
+  let promise = fetch(url);
   promise.then(response => response.text())
   .then(data => {
-    var xml = (new window.DOMParser()).parseFromString(data, "text/xml");
+    let xml = (new window.DOMParser()).parseFromString(data, "text/xml");
      console.log(xml);
      loginResponse(xml);
   }).catch(error => {
